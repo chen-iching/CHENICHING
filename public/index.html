@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>ROOMi Demo</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <!-- Modal 背景 -->
+<div id="loginModal" class="modal">
+  <div class="modal-content">
+    <h2>請輸入你的名字</h2>
+    <input type="text" id="username" placeholder="名字">
+    <button id="loginBtn">登入</button>
+  </div>
+</div>
+
+<!-- 遊戲區塊 -->
+<div id="game">
+    <h1>ROOMi Demo</h1>
+  <div id="room">
+    <img src="preson1.png" class="furniture" style="left:50px;top:200px;">
+    <img src="preson2.png" class="furniture" style="left:200px;top:200px;">
+  </div>
+
+  <div id="chat">
+    <ul id="messages"></ul>
+    <input id="m" autocomplete="off"><button>送出</button>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="script.js"></script>
+  <script>
+    // 拖曳家具
+    function initDrag() {
+    const furnitures = document.querySelectorAll(".furniture");
+    furnitures.forEach(f => {
+      f.ondragstart = () => false; // 禁用瀏覽器原生拖曳
+
+      f.onmousedown = (e) => {
+        let shiftX = e.clientX - f.getBoundingClientRect().left;
+        let shiftY = e.clientY - f.getBoundingClientRect().top;
+        function moveAt(pageX, pageY) {
+          f.style.left = pageX - shiftX - f.parentElement.offsetLeft + "px";
+          f.style.top = pageY - shiftY - f.parentElement.offsetTop + "px";
+        }
+        function onMouseMove(e) { moveAt(e.pageX, e.pageY); }
+
+        // 綁定 mousemove
+        document.addEventListener("mousemove", onMouseMove);
+
+         //只要滑鼠放開，就解除事件
+        function onMouseUp() {
+          document.removeEventListener("mousemove", onMouseMove);
+          document.removeEventListener("mouseup", onMouseUp); // 移除自己，避免重複
+        };
+      document.addEventListener("mouseup", onMouseUp);
+      };
+    });
+  }
+
+    // 聊天功能
+    var socket = io();
+    var chatBtn = document.querySelector("#chat button");
+chatBtn.onclick = () => {
+  if (input.value) {
+    socket.emit("chat message", input.value);
+    input.value = "";
+  }
+};
+    var input = document.getElementById("m");
+    var messages = document.getElementById("messages");
+
+    form.onclick = () => {
+      if (input.value) {
+        socket.emit("chat message", input.value);
+        input.value = "";
+      }
+    };
+
+    socket.on("chat message", (msg) => {
+      let li = document.createElement("li");
+      li.textContent = msg;
+      messages.appendChild(li);
+    });
+    // 登入 Modal 控制
+    const loginModal = document.getElementById("loginModal");
+    const loginBtn = document.getElementById("loginBtn");
+    const usernameInput = document.getElementById("username");
+
+    // 預設一開始顯示彈窗
+    loginModal.style.display = "block";
+
+    loginBtn.addEventListener("click", () => {
+     const username = usernameInput.value.trim();
+   if (username) {
+    // 可以先暫存名字
+    localStorage.setItem("username", username);
+
+    // 登入後隱藏 modal
+    loginModal.style.display = "none";
+  } else {
+    alert("請輸入名字！");
+  }
+});
+
+  </script>
+</body>
+</html>
