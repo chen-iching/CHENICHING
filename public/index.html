@@ -18,10 +18,11 @@
 
 <!-- 遊戲區塊 -->
 <div id="game">
-    <h1>ROOMi Demo</h1>
+    <h1>ROOMi Demo</h1><h2 id="user"></h2>
   <div id="room">
-    <img src="preson1.png" class="furniture" style="left:50px;top:200px;">
-    <img src="preson2.png" class="furniture" style="left:200px;top:200px;">
+    <img src="preson1.png" class="people" style="left:50px;top:200px;">
+    <img src="preson2.png" class="people" style="left:200px;top:200px;">
+    <img src="preson1.png" class="furniture" style="left:100px;top:100px;position:absolute;">
   </div>
 
   <div id="chat">
@@ -29,12 +30,13 @@
     <input id="m" autocomplete="off"><button>送出</button>
   </div>
 
-  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <!-- <script src="/socket.io/socket.io.js"></script> -->
   <script src="script.js"></script>
   <script>
     // 拖曳家具
-    function initDrag() {
-    const furnitures = document.querySelectorAll(".furniture");
+  function initDrag() {
+    const furnitures = document.querySelectorAll(".people, .furniture");
     furnitures.forEach(f => {
       f.ondragstart = () => false; // 禁用瀏覽器原生拖曳
 
@@ -59,51 +61,56 @@
       };
     });
   }
+  window.addEventListener("load", initDrag);
 
     // 聊天功能
     var socket = io();
     var chatBtn = document.querySelector("#chat button");
-chatBtn.onclick = () => {
-  if (input.value) {
-    socket.emit("chat message", input.value);
-    input.value = "";
-  }
-};
-    var input = document.getElementById("m");
-    var messages = document.getElementById("messages");
-
-    form.onclick = () => {
+    chatBtn.onclick = () => {
       if (input.value) {
         socket.emit("chat message", input.value);
         input.value = "";
       }
     };
+    var input = document.getElementById("m");
+    var messages = document.getElementById("messages");
+
+    // form.onclick = () => {
+    //   if (input.value) {
+    //     socket.emit("chat message", input.value);
+    //     input.value = "";
+    //   }
+    // };
 
     socket.on("chat message", (msg) => {
       let li = document.createElement("li");
       li.textContent = msg;
       messages.appendChild(li);
     });
+    
     // 登入 Modal 控制
-    const loginModal = document.getElementById("loginModal");
-    const loginBtn = document.getElementById("loginBtn");
-    const usernameInput = document.getElementById("username");
+    // const loginModal = document.getElementById("loginModal");
+    // const loginBtn = document.getElementById("loginBtn");
+    // const usernameInput = document.getElementById("username");
+    // const user = document.getElementById("user");
 
     // 預設一開始顯示彈窗
-    loginModal.style.display = "block";
+    // loginModal.style.display = "block";
 
-    loginBtn.addEventListener("click", () => {
+    loginBtn.addEventListener("click",() => {
      const username = usernameInput.value.trim();
-   if (username) {
-    // 可以先暫存名字
-    localStorage.setItem("username", username);
+    if (username) {
+      // 可以先暫存名字
+      localStorage.setItem("username", username);
+      user.textContent = localStorage.getItem("username");
 
-    // 登入後隱藏 modal
-    loginModal.style.display = "none";
-  } else {
-    alert("請輸入名字！");
-  }
-});
+      // 登入後隱藏 modal
+      loginModal.style.display = "none";
+    } 
+    else {
+      alert("請輸入名字！");
+    }
+    });
 
   </script>
 </body>
